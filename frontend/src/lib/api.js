@@ -1,30 +1,46 @@
-const BASE_URL = 'https://tn-backend-1.onrender.com'; // Replace with your actual backend URL
+import { API_URL } from './config';
+const BASE_URL = API_URL;
 
-export async function createProgram(name) {
+async function adminJson(res) {
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+export async function adminLogin(email, password) {
+  const res = await fetch(`${BASE_URL}/api/admin/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+  return adminJson(res); // { token }
+}
+
+export async function createProgram(name, adminToken) {
   const res = await fetch(`${BASE_URL}/api/programs`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-auth-token': adminToken },
     body: JSON.stringify({ name }),
   });
-  return res.json();
+  return adminJson(res);
 }
 
-export async function createMentor(data) {
+export async function createMentor(data, adminToken) {
   const res = await fetch(`${BASE_URL}/api/mentors`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-auth-token': adminToken },
     body: JSON.stringify(data),
   });
-  return res.json();
+  return adminJson(res);
 }
 
-export async function addMentorToProgram(programId, mentorId) {
+export async function addMentorToProgram(programId, mentorId, adminToken) {
   const res = await fetch(`${BASE_URL}/api/programs/${programId}/add-mentor`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-auth-token': adminToken },
     body: JSON.stringify({ mentorId }),
   });
-  return res.json();
+  return adminJson(res);
 }
 
 export async function getAllPrograms() {
@@ -32,13 +48,12 @@ export async function getAllPrograms() {
     return res.json();
 }
   
-export async function getAllMentors() {
-    const res = await fetch(`${BASE_URL}/api/mentors`);
-    return res.json();
+export async function getAllMentors(adminToken) {
+    const res = await fetch(`${BASE_URL}/api/mentors`, { headers: { 'x-auth-token': adminToken } });
+    return adminJson(res);
 }
   
 export async function mentorLogin(email, password) {
-  console.log(email,password);
     const res = await fetch(`${BASE_URL}/api/mentors/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -1,73 +1,54 @@
 'use client';
 import { useState } from 'react';
 import axios from 'axios';
+import { API_URL } from '../../lib/config';
+import './mentee.css';
 
-export default function ProjectSubmissionForm({ resourceId, onSubmitted }) {
+export default function ProjectSubmissionForm({ resourceId, onSubmitted, onCancel }) {
   const [githubLink, setGithubLink] = useState('');
-  const [deployedLink, setdeployedLink] = useState('');
+  const [deployedLink, setDeployedLink] = useState('');
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // if (description.trim().split(' ').length < 50) {
-    //   return alert('Please enter a description with at least 300 words (~50+ words).');
-    // }
-
     setSubmitting(true);
+    setError('');
     try {
       const token = localStorage.getItem('menteeToken');
       const res = await axios.post(
-        `hhttps://tn-backend-1.onrender.com/api/m/resources/${resourceId}/project`,
+        `${API_URL}/api/m/resources/${resourceId}/project`,
         { githubLink, deployedLink, description },
         { headers: { 'x-auth-token': token } }
       );
-
-      alert('Project submitted successfully!');
       onSubmitted(res.data.score || 0);
     } catch (err) {
-      alert(err.response?.data?.error || 'Failed to submit project.');
+      setError(err.response?.data?.error || 'Could not submit the project.');
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginTop: '1rem' }}>
-      <div>
-        <label>GitHub Repository:</label>
-        <input
-          type="url"
-          required
-          value={githubLink}
-          onChange={(e) => setGithubLink(e.target.value)}
-          placeholder="https://github.com/your-repo"
-        />
+    <form onSubmit={handleSubmit}>
+      {error && <div className="tn-alert tn-alert-error" role="alert">{error}</div>}
+      <div className="tn-field">
+        <label htmlFor={`gh-${resourceId}`}>GitHub repository</label>
+        <input id={`gh-${resourceId}`} className="tn-input" type="url" required value={githubLink} onChange={(e) => setGithubLink(e.target.value)} placeholder="https://github.com/you/project" />
       </div>
-      <div>
-        <label>Live Project Link:</label>
-        <input
-          type="url"
-          required
-          value={deployedLink}
-          onChange={(e) => setdeployedLink(e.target.value)}
-          placeholder="https://your-project.live"
-        />
+      <div className="tn-field">
+        <label htmlFor={`live-${resourceId}`}>Live link</label>
+        <input id={`live-${resourceId}`} className="tn-input" type="url" required value={deployedLink} onChange={(e) => setDeployedLink(e.target.value)} placeholder="https://your-project.vercel.app" />
       </div>
-      <div>
-        <label>Project Description:</label>
-        <textarea
-          rows={6}
-          required
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Write at least 300 words about your project"
-        />
+      <div className="tn-field">
+        <label htmlFor={`d-${resourceId}`}>What did you build, and what did you learn?</label>
+        <textarea id={`d-${resourceId}`} className="tn-textarea" rows={5} required value={description} onChange={(e) => setDescription(e.target.value)} />
       </div>
-      <button type="submit" disabled={submitting}>
-        {submitting ? 'Submitting...' : 'Submit Project'}
-      </button>
+      <div style={{ display: 'flex', gap: 10 }}>
+        <button type="submit" className="tn-btn tn-btn-teal" disabled={submitting}>{submitting ? 'Submitting…' : 'Submit project'}</button>
+        {onCancel && <button type="button" className="tn-btn tn-btn-ghost" onClick={onCancel}>Cancel</button>}
+      </div>
     </form>
   );
 }

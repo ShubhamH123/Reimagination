@@ -89,6 +89,14 @@ router.post('/resources/:id/complete', authenticateMentee, async (req, res) => {
     const resource = await Resource.findById(req.params.id);
     const mentee = req.mentee;
 
+    if (!resource) {
+      return res.status(404).json({ error: 'Resource not found' });
+    }
+    // Quizzes and projects are scored through their own routes; only videos can be self-marked.
+    if (resource.type !== 'video') {
+      return res.status(400).json({ error: 'Only video resources can be marked complete directly' });
+    }
+
     // Check if resource is unlocked
     if (resource.isLocked) {
       return res.status(403).json({ error: 'Resource is locked' });

@@ -1,10 +1,7 @@
 import AdminPanel from "@/components/adminPanel";
 
+export const metadata = { title: "Admin | TechNeeds IGDTUW" };
+
 export default function AdminPage() {
-  return (
-    <div>
-      <h1>Admin Page</h1>
-      <AdminPanel />
-    </div>
-  );
+  return <AdminPanel />;
 }

@@ -179,7 +179,7 @@ export default function MentorPanel() {
 
   return (
     <>
-    <div className="container">
+    <div className="tn-mentor">
       {!loggedIn ? (
         <div className="login-container">
         <div className="login-card">

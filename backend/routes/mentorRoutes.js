@@ -6,12 +6,12 @@ const Program = require('../models/Program');
 const Resource = require('../models/Resource');
 const Mentee = require('../models/Mentee');
 const Quiz = require('../models/Quiz');
-const { authenticate } = require('../middleware/authMentor');
+const { authenticate, authenticateAdmin } = require('../middleware/authMentor');
 const router = express.Router();
 
 
 // Create Mentor (Directly via Thunder Client)
-router.post('/mentors', async (req, res) => {
+router.post('/mentors', authenticateAdmin, async (req, res) => {
   try {
     console.log("Creating mentor...")
     const { name, email, password } = req.body;
@@ -22,16 +22,17 @@ router.post('/mentors', async (req, res) => {
       password: await bcrypt.hash(password, salt)
     });
     await mentor.save();
-    res.status(201).json(mentor);
+    const { password: _pw, ...safeMentor } = mentor.toObject();
+    res.status(201).json(safeMentor);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
 // Get all mentors
-router.get('/mentors', async (req, res) => {
+router.get('/mentors', authenticateAdmin, async (req, res) => {
   try {
-    const mentors = await Mentor.find().populate('programs'); 
+    const mentors = await Mentor.find().select('-password').populate('programs'); 
     res.json(mentors);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -57,7 +58,8 @@ router.post('/mentors/login', async (req, res) => {
       return res.status(400).json({ error: 'Invalid credentials' });
     }
     const token = jwt.sign({ id: mentor._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, mentor });
+    const { password: _pw, ...safeMentor } = mentor.toObject();
+    res.json({ token, mentor: safeMentor });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -65,7 +67,7 @@ router.post('/mentors/login', async (req, res) => {
 
 
 // Create Program (Assign to Mentor)
-router.post('/programs', async (req, res) => {
+router.post('/programs', authenticateAdmin, async (req, res) => {
   try {
     const program = new Program({
       name: req.body.name // Auto-assign creator as mentor
@@ -79,7 +81,7 @@ router.post('/programs', async (req, res) => {
 });
 
 // Add Mentor to Program (Manual via Thunder Client)
-router.post('/programs/:programId/add-mentor', async (req, res) => {
+router.post('/programs/:programId/add-mentor', authenticateAdmin, async (req, res) => {
   try {
     const program = await Program.findById(req.params.programId);
     const mentor = await Mentor.findById(req.body.mentorId);

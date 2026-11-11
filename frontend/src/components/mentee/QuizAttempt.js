@@ -1,77 +1,74 @@
 'use client';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_URL } from '../../lib/config';
+import './mentee.css';
 
-export default function QuizAttempt({ resourceId, onComplete }) {
+export default function QuizAttempt({ resourceId, onComplete, onCancel }) {
   const [quiz, setQuiz] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const token = localStorage.getItem('menteeToken');
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const fetchQuiz = async () => {
+    const token = localStorage.getItem('menteeToken');
+    (async () => {
       try {
-        const res = await axios.get(`https://tn-backend-1.onrender.com/api/m/resources/${resourceId}/quiz`, {
-          headers: { 'x-auth-token': token },
-        });
+        const res = await axios.get(`${API_URL}/api/m/resources/${resourceId}/quiz`, { headers: { 'x-auth-token': token } });
         setQuiz(res.data);
-        setAnswers(res.data.questions.map((_, i) => ({ questionId: _.id, selectedOptionIndex: -1 })));
-        setLoading(false);
+        setAnswers(res.data.questions.map((q) => ({ questionId: q.id, selectedOptionIndex: -1 })));
       } catch (err) {
-        alert(err.response?.data?.error || 'Error fetching quiz');
+        setError(err.response?.data?.error || 'Could not load this quiz.');
+      } finally {
         setLoading(false);
       }
-    };
-    fetchQuiz();
+    })();
   }, [resourceId]);
 
-  const handleOptionChange = (qIndex, optIndex) => {
-    const updated = [...answers];
-    updated[qIndex].selectedOptionIndex = optIndex;
-    setAnswers(updated);
+  const choose = (qIndex, optIndex) => {
+    setAnswers((prev) => prev.map((a, i) => (i === qIndex ? { ...a, selectedOptionIndex: optIndex } : a)));
   };
 
-  const handleSubmit = async () => {
+  const submit = async () => {
+    setSubmitting(true);
+    setError('');
     try {
-      const res = await axios.post(`https://tn-backend-1.onrender.com/api/m/resources/${resourceId}/quiz/submit`, {
-        answers,
-      }, {
-        headers: { 'x-auth-token': token }
-      });
-      alert(`Quiz submitted! Score: ${res.data.score}`);
-      onComplete(res.data.score); // Notify parent to update state
+      const token = localStorage.getItem('menteeToken');
+      const res = await axios.post(`${API_URL}/api/m/resources/${resourceId}/quiz/submit`, { answers }, { headers: { 'x-auth-token': token } });
+      onComplete(res.data.score);
     } catch (err) {
-      alert(err.response?.data?.error || 'Error submitting quiz');
+      setError(err.response?.data?.error || 'Could not submit the quiz.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  if (loading) return <div>Loading Quiz...</div>;
-  if (!quiz) return <div>No quiz found.</div>;
+  if (loading) return <p className="tn-muted">Loading quiz…</p>;
+  if (!quiz) return <div className="tn-alert tn-alert-error">{error || 'No quiz found.'}</div>;
 
+  const unanswered = answers.filter((a) => a.selectedOptionIndex === -1).length;
   return (
     <div>
-      <h2>{quiz.title}</h2>
-      <p>{quiz.description}</p>
+      {error && <div className="tn-alert tn-alert-error" role="alert">{error}</div>}
+      {quiz.title && <h4 className="tn-title tn-h3">{quiz.title}</h4>}
+      {quiz.description && <p className="tn-muted">{quiz.description}</p>}
       {quiz.questions.map((q, i) => (
-        <div key={q._id} style={{ marginBottom: '1rem' }}>
-          <strong>Q{i + 1}: {q.questionText}</strong><br />
+        <fieldset key={q._id || i} className="tn-quiz-q" style={{ border: 0, padding: 0 }}>
+          <legend style={{ fontWeight: 700, fontSize: '1rem' }}>{i + 1}. {q.questionText}</legend>
           {q.options.map((opt, j) => (
-            <div key={j}>
-              <label>
-                <input
-                  type="radio"
-                  name={`question-${i}`}
-                  value={j}
-                  checked={answers[i].selectedOptionIndex === j}
-                  onChange={() => handleOptionChange(i, j)}
-                />
-                {opt}
-              </label>
-            </div>
+            <label key={j} className="tn-quiz-opt">
+              <input type="radio" name={`question-${i}`} checked={answers[i].selectedOptionIndex === j} onChange={() => choose(i, j)} />
+              {opt}
+            </label>
           ))}
-        </div>
+        </fieldset>
       ))}
-      <button onClick={handleSubmit}>Submit Quiz</button>
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+        <button className="tn-btn tn-btn-teal" onClick={submit} disabled={submitting}>{submitting ? 'Submitting…' : 'Submit quiz'}</button>
+        {onCancel && <button className="tn-btn tn-btn-ghost" onClick={onCancel}>Cancel</button>}
+        {unanswered > 0 && <span className="tn-muted">{unanswered} unanswered</span>}
+      </div>
     </div>
   );
 }

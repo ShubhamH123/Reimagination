@@ -21,6 +21,12 @@ const MenteeSchema = new mongoose.Schema({
     submittedOn: { type: Date },
     verified:{type: Boolean, default:false},
   }],
+  interests: [{ type: String, trim: true, maxlength: 24 }],
+  aiProfile: {
+    signature: String,
+    generatedAt: Date,
+    data: mongoose.Schema.Types.Mixed
+  },
   streak: { type: Number, default: 0 },
   totalScore: { type: Number, default: 0 },
   lastActiveDate: { type: Date },
