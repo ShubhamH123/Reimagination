@@ -1,9 +1,5 @@
-import Homepage from "@/components/Home/homepage";
+import Landing from '@/components/tn/Landing';
 
 export default function HomePage() {
-  return (
-    <div>
-      <Homepage />
-    </div>
-  );
+  return <Landing />;
 }

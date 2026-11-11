@@ -1,7 +1,7 @@
-import Profile from "@/components/profile/profile";
+import MenteeApp from '@/components/tn/mentee/MenteeApp';
 
-export const metadata = { title: "My profile | TechNeeds IGDTUW" };
+export const metadata = { title: 'AI Profile · TechNeeds' };
 
 export default function ProfilePage() {
-  return <Profile />;
+  return <MenteeApp initialTab="profile" />;
 }

@@ -1,29 +1,29 @@
-import "./globals.css";
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { Plus_Jakarta_Sans } from 'next/font/google';
+import './globals.css';
+import 'bootstrap/dist/css/bootstrap.min.css'; // still used by the legacy Team / Techboard / FAQ pages
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import Navbar from "@/components/navbar/navbar";
-import Footer from "@/components/footer/footer";
+import '../styles/tn.css'; // design system — loaded last so it wins over Bootstrap
+import { ToastProvider } from '@/components/tn/Toast';
+import Chrome from '@/components/tn/Chrome';
+
+const jakarta = Plus_Jakarta_Sans({
+  variable: '--font-jakarta',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800']
+});
 
 export const metadata = {
-  title: "TechNeeds IGDTUW | Mentorship, cohorts and a leaderboard",
-  description: "Join a TechNeeds mentorship cohort: learn from seniors, finish quizzes and projects, and climb the leaderboard.",
+  title: 'TechNeeds · Learn together, grow faster',
+  description: 'The mentorship platform of TechNeeds IGDTUW: cohorts, quizzes, projects, a live leaderboard and an AI-generated learner profile.'
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body>
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
+      <body className={jakarta.variable}>
+        <ToastProvider>
+          <Chrome>{children}</Chrome>
+        </ToastProvider>
       </body>
     </html>
   );

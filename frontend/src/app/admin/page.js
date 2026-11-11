@@ -1,7 +1,7 @@
-import AdminPanel from "@/components/adminPanel";
+import AdminApp from '@/components/tn/admin/AdminApp';
 
-export const metadata = { title: "Admin | TechNeeds IGDTUW" };
+export const metadata = { title: 'Admin console · TechNeeds' };
 
 export default function AdminPage() {
-  return <AdminPanel />;
+  return <AdminApp />;
 }

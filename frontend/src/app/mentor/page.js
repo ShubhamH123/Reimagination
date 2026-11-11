@@ -1,9 +1,7 @@
-import MentorPanel from '@/components/mentor/mentorPanel';
+import MentorApp from '@/components/tn/mentor/MentorApp';
 
-export default function Mentorpage() {
-  return (
-    <div>
-      <MentorPanel />
-    </div>
-  );
+export const metadata = { title: 'Mentor workspace · TechNeeds' };
+
+export default function MentorPage() {
+  return <MentorApp />;
 }

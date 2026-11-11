@@ -14,8 +14,6 @@ app.use(express.json());
 // Routes
 app.use('/api', require('./routes/mentorRoutes')); // All routes under /api
 app.use('/api/m', require('./routes/menteeRoutes'));
-app.use('/api/admin', require('./routes/adminRoutes'));
-app.use('/api/profile', require('./routes/profileRoutes'));
 app.get('/', (req, res) => res.send('Mentorship API Running'));
 
 const PORT = process.env.PORT || 8000;

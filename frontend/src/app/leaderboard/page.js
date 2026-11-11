@@ -1,5 +1,7 @@
-import Leaderboard from '@/components/Leaderboard/leaderboard';
+import PublicLeaderboard from '@/components/tn/Leaderboard';
+
+export const metadata = { title: 'Leaderboard · TechNeeds' };
 
 export default function LeaderboardPage() {
-  return <Leaderboard />;
+  return <PublicLeaderboard />;
 }

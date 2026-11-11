@@ -1,12 +1,7 @@
-// import MenteeDashboard from "@/components/mentee/dashboard";
-// import MenteeLogin from "@/components/mentee/login";
+import MenteeLogin from '@/components/tn/MenteeLogin';
 
-import MenteeLogin from "@/components/mentee/login";
+export const metadata = { title: 'Mentee login · TechNeeds' };
 
-export default function Menteepage() {
-  return (
-    <div>
-      <MenteeLogin/>
-    </div>
-  );
+export default function MenteeLoginPage() {
+  return <MenteeLogin />;
 }
